@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chat Platform</title>
+  <script src="https://www.gstatic.com/firebasejs/10.1.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.1.0/firebase-firestore.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f4f4f9;
+    }
+    .chat-container {
+      max-width: 600px;
+      margin: 20px auto;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+    }
+    .messages {
+      height: 400px;
+      overflow-y: auto;
+      padding: 10px;
+      border-bottom: 1px solid #ddd;
+    }
+    .message {
+      margin-bottom: 10px;
+    }
+    .message .user {
+      font-weight: bold;
+      color: #333;
+    }
+    .message .text {
+      margin-top: 5px;
+      color: #555;
+    }
+    .input-area {
+      display: flex;
+      padding: 10px;
+      background-color: #f9f9f9;
+    }
+    .input-area input {
+      flex: 1;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      margin-right: 10px;
+    }
+    .input-area button {
+      padding: 10px 20px;
+      background-color: #333;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .input-area button:hover {
+      background-color: #555;
+    }
+  </style>
+  <script>
+    // Firebase Configuration (Replace with your Firebase project config)
+    const firebaseConfig = {
+      apiKey: "AIzaSyDpFlXdfjuyMnF5sc8GHlG980e7JaCpmK0",
+      authDomain: "chat-box-ff4d6.firebaseapp.com",
+      projectId: "chat-box-ff4d6",
+      storageBucket: "chat-box-ff4d6.firebasestorage.app",
+      messagingSenderId: "1096678795079",
+      appId: "1:1096678795079:web:e457f1c7fb22b865938e62"
+    };
+    // Initialize Firebase
+    const app = firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    function sendMessage() {
+      try {
+        const messageInput = document.getElementById('messageInput');
+        const message = messageInput.value.trim();
+        if (message !== "") {
+          db.collection('messages').add({
+            text: message,
+            timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+            user: "Anonymous"
+          });
+          messageInput.value = "";
+        }
+      } catch (error) {
+        console.error("Error sending message: ", error);
+      }
+    }
+
+    db.collection('messages')
+      .orderBy('timestamp')
+      .onSnapshot((snapshot) => {
+        const messagesDiv = document.getElementById('messages');
+        messagesDiv.innerHTML = "";
+        snapshot.forEach(doc => {
+          const message = doc.data();
+          const messageElement = document.createElement('div');
+          messageElement.classList.add('message');
+          messageElement.innerHTML = `
+            <div class="user">${message.user}</div>
+            <div class="text">${message.text}</div>
+          `;
+          messagesDiv.appendChild(messageElement);
+        });
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+      });
+  </script>
+</head>
+<body>
+  <div class="chat-container">
+    <div class="messages" id="messages">
+      <!-- Messages will appear here -->
+    </div>
+    <div class="input-area">
+      <input type="text" id="messageInput" placeholder="Type your message...">
+      <button onclick="sendMessage()">Send</button>
+    </div>
+  </div>
+</body>
+</html>
